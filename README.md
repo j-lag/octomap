@@ -4,6 +4,30 @@ OctoMap - RealTime Fork
 In this Fork we will try to accelerate octomap and try to provide realtime map update.
 
 
+Day 1:
+--------
+OccupancyOcTreeBase<NODE>::computeUpdate is multithreaded with openMP. This is good BUT
+profiling reveal that locks cost a lot (50% of runtime is spent in RtlCriticalSection or RtlWaitForCriticalSection)
+
+Modifications: 
+- Remove critical section on  free_cells & occupied_cells updates.
+- duplicate free_cells & occupied_cells -> one for each thread
+- agregate result of each thread at the end
+
+Test done on "graph2tree -i  geb079_max50m.graph -o test.bt -res 0.4"
+
+result on my old I7: 
+- without modification : time to insert 100.000 points took: 0.204881 sec (avg)
+- without OPENMP       : time to insert 100.000 points took: 0.112934 sec (avg)
+- with optimisation    : time to insert 100.000 points took: 0.0584745 sec (avg)
+
+
+FIXME later: 
+When resolution is high (-res 0.01) the botleneck change: octomap::OccupancyOcTreeBase<octomap::OcTreeNode>::updateNode
+Next optimisation should be done there.
+
+
+
 
 
 Original README:
