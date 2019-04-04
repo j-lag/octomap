@@ -3,6 +3,16 @@ OctoMap - RealTime Fork
 
 In this Fork we will try to accelerate octomap and try to provide realtime map update.
 
+Test are done on:
+***The old One***
+  * Name			Intel Core i7 920
+  * Codename		Bloomfield
+  * Specification		Intel(R) Core(TM) i7 CPU         920  @ 2.67GHz
+  * Number of cores		4 (max 4)
+  * Number of threads	8 (max 8)
+**The New One***
+  * TODO
+
 
 Day 1:
 --------
