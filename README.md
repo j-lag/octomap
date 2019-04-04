@@ -1,3 +1,15 @@
+OctoMap - RealTime Fork
+===========================================================================
+
+In this Fork we will try to accelerate octomap and try to provide realtime map update.
+
+
+
+
+Original README:
+===========================================================================
+
+
 OctoMap - An Efficient Probabilistic 3D Mapping Framework Based on Octrees.
 ===========================================================================
 
