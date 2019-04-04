@@ -118,6 +118,7 @@ namespace octomap {
       return;
 
 #ifdef _OPENMP
+	//printf("running %d thread for insertPointCloudRays\n", this->keyrays.size());
     omp_set_num_threads(this->keyrays.size());
     #pragma omp parallel for
 #endif
@@ -169,17 +170,19 @@ namespace octomap {
   void OccupancyOcTreeBase<NODE>::computeUpdate(const Pointcloud& scan, const octomap::point3d& origin,
                                                 KeySet& free_cells, KeySet& occupied_cells,
                                                 double maxrange)
-  {
-
-
-
+  {	
+	unsigned threadIdx = 0;
 #ifdef _OPENMP
+	
+	//avoid locking by distributing cells among threads then regroup them
+	std::vector<KeySet> free_cells_omp(this->keyrays.size());
+	std::vector<KeySet> occupied_cells_omp(this->keyrays.size());
+	//printf("running %d thread for computeUpdate\n", this->keyrays.size());
     omp_set_num_threads(this->keyrays.size());
     #pragma omp parallel for schedule(guided)
 #endif
     for (int i = 0; i < (int)scan.size(); ++i) {
-      const point3d& p = scan[i];
-      unsigned threadIdx = 0;
+      const point3d& p = scan[i];      
 #ifdef _OPENMP
       threadIdx = omp_get_thread_num();
 #endif
@@ -191,32 +194,29 @@ namespace octomap {
           // free cells
           if (this->computeRayKeys(origin, p, *keyray)){
 #ifdef _OPENMP
-            #pragma omp critical (free_insert)
+			free_cells_omp[threadIdx].insert(keyray->begin(), keyray->end());
+#else
+			free_cells.insert(keyray->begin(), keyray->end());
 #endif
-            {
-              free_cells.insert(keyray->begin(), keyray->end());
-            }
           }
           // occupied endpoint
           OcTreeKey key;
           if (this->coordToKeyChecked(p, key)){
 #ifdef _OPENMP
-            #pragma omp critical (occupied_insert)
+			  occupied_cells_omp[threadIdx].insert(key);
+#else
+			  occupied_cells.insert(key);
 #endif
-            {
-              occupied_cells.insert(key);
-            }
           }
         } else { // user set a maxrange and length is above
           point3d direction = (p - origin).normalized ();
           point3d new_end = origin + direction * (float) maxrange;
           if (this->computeRayKeys(origin, new_end, *keyray)){
 #ifdef _OPENMP
-            #pragma omp critical (free_insert)
+			  free_cells_omp[threadIdx].insert(keyray->begin(), keyray->end());
+#else
+			  free_cells.insert(keyray->begin(), keyray->end());
 #endif
-            {
-              free_cells.insert(keyray->begin(), keyray->end());
-            }
           }
         } // end if maxrange
       } else { // BBX was set
@@ -227,11 +227,10 @@ namespace octomap {
           OcTreeKey key;
           if (this->coordToKeyChecked(p, key)){
 #ifdef _OPENMP
-            #pragma omp critical (occupied_insert)
+			  occupied_cells_omp[threadIdx].insert(key);
+#else
+			  occupied_cells.insert(key);
 #endif
-            {
-              occupied_cells.insert(key);
-            }
           }
 
           // update freespace, break as soon as bbx limit is reached
@@ -239,11 +238,10 @@ namespace octomap {
             for(KeyRay::reverse_iterator rit=keyray->rbegin(); rit != keyray->rend(); rit++) {
               if (inBBX(*rit)) {
 #ifdef _OPENMP
-                #pragma omp critical (free_insert)
+				  free_cells_omp[threadIdx].insert(*rit);
+#else
+				  free_cells.insert(*rit);
 #endif
-                {
-                  free_cells.insert(*rit);
-                }
               }
               else break;
             }
@@ -253,6 +251,21 @@ namespace octomap {
 
     } // end for all points, end of parallel OMP loop
 
+
+
+/*
+	This solution seems to be a bit less efficient than the next one...
+#ifdef _OPENMP
+	omp_set_num_threads(2);
+	#pragma omp parallel
+	{
+		threadIdx = omp_get_thread_num();
+		if(threadIdx == 0) for (int i = 0; i < this->keyrays.size(); ++i)
+			free_cells.insert(free_cells_omp[i].begin(), free_cells_omp[i].end());
+		else if (threadIdx == 1) for (int i = 0; i < this->keyrays.size(); ++i)	
+			occupied_cells.insert(occupied_cells_omp[i].begin(), occupied_cells_omp[i].end());
+	}
+#endif
     // prefer occupied cells over free ones (and make sets disjunct)
     for(KeySet::iterator it = free_cells.begin(), end=free_cells.end(); it!= end; ){
       if (occupied_cells.find(*it) != occupied_cells.end()){
@@ -261,6 +274,52 @@ namespace octomap {
         ++it;
       }
     }
+*/
+
+#ifdef _OPENMP
+	//clean free cells
+	omp_set_num_threads(this->keyrays.size());
+	#pragma omp parallel for schedule(guided)
+	for (int i = 0; i < this->keyrays.size(); ++i)
+	{
+		KeySet& free_cs = free_cells_omp[i];
+		for (KeySet::iterator it = free_cs.begin(), end = free_cs.end(); it != end; ) 
+		{
+			bool found = false;
+			for (int j = 0; j < this->keyrays.size() && found == false; ++j)
+				if (occupied_cells_omp[j].find(*it) != occupied_cells_omp[j].end())
+					found = true;
+			if (found) it = free_cs.erase(it);
+			else ++it;
+		}
+	}	
+	//agregate sub table
+	omp_set_num_threads(2);
+	#pragma omp parallel
+	{
+		threadIdx = omp_get_thread_num();
+		if (threadIdx == 0) for (int i = 0; i < this->keyrays.size(); ++i)
+			free_cells.insert(free_cells_omp[i].begin(), free_cells_omp[i].end());
+		else if (threadIdx == 1) for (int i = 0; i < this->keyrays.size(); ++i)
+			occupied_cells.insert(occupied_cells_omp[i].begin(), occupied_cells_omp[i].end());
+	}
+
+
+
+#else
+	// prefer occupied cells over free ones (and make sets disjunct)
+	for (KeySet::iterator it = free_cells.begin(), end = free_cells.end(); it != end; ) {
+		if (occupied_cells.find(*it) != occupied_cells.end()) {
+			it = free_cells.erase(it);
+		}
+		else {
+			++it;
+		}
+	}
+#endif
+	
+	
+
   }
 
   template <class NODE>
