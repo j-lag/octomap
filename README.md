@@ -23,7 +23,7 @@ result on my old I7:
 
 
 FIXME later: 
-When resolution is high (-res 0.01) the botleneck change: octomap::OccupancyOcTreeBase<octomap::OcTreeNode>::updateNode
+When resolution is high (-res 0.01) the bottleneck change: octomap::OccupancyOcTreeBase<octomap::OcTreeNode>::updateNode
 Next optimisation should be done there.
 
 
