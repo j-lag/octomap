@@ -26,13 +26,17 @@ Modifications:
 - duplicate free_cells & occupied_cells -> one for each thread
 - agregate result of each thread at the end
 
-Test done on "graph2tree -i  geb079_max50m.graph -o test.bt -res 0.4"
+Test are done with this command: "graph2tree -i 0 *TEST_FILE* -o test.bt -res 0.4"
+
 
 result on **The Old One**: 
-- without modification : time to insert 100.000 points took: 0.204881 sec (avg)
-- without OPENMP       : time to insert 100.000 points took: 0.112934 sec (avg)
-- with optimisation    : time to insert 100.000 points took: 0.0584745 sec (avg)
 
+| *TEST_FILE*         | Original OpenMp |without OpenMP | OpenMP with optimisation |
+| ------------- | ------------- | ------------- | ------------- |
+|  geb079_max50m.graph <br> Data points in graph: 5903426 | time to insert scans:<br> 12.095 sec<br> time to insert 100.000 points took:<br> 0.204881 sec (avg) |time to insert scans:<br> 6.667 sec<br>time to insert 100.000 points took:<br> 0.112934 sec (avg) | time to insert scans:<br> 3.452 sec <br>time to insert 100.000 points took:<br> 0.0584745 sec (avg) |
+| new_college_dataset.graph <br> Data points in graph: 14468149| time to insert scans:<br> 184.516 sec<br>time to insert 100.000 points took:<br> 1.27533 sec (avg) | time to insert scans:<br> 84.289 sec<br>time to insert 100.000 points took:<br> 0.582583 sec (avg) |time to insert scans:<br> 139.228 sec<br>time to insert 100.000 points took:<br> 0.962307 sec (avg)|
+
+*Results are unconclusive, have to test on other datasets/ computer...*
 
 FIXME later: 
 When resolution is high (-res 0.01) the bottleneck change: octomap::OccupancyOcTreeBase<octomap::OcTreeNode>::updateNode
