@@ -4,13 +4,15 @@ OctoMap - RealTime Fork
 In this Fork we will try to accelerate octomap and try to provide realtime map update.
 
 Test are done on:
-***The old One***
+
+**The Old One**
   * Name			Intel Core i7 920
   * Codename		Bloomfield
   * Specification		Intel(R) Core(TM) i7 CPU         920  @ 2.67GHz
   * Number of cores		4 (max 4)
   * Number of threads	8 (max 8)
-**The New One***
+  
+**The New One**
   * TODO
 
 
@@ -26,7 +28,7 @@ Modifications:
 
 Test done on "graph2tree -i  geb079_max50m.graph -o test.bt -res 0.4"
 
-result on my old I7: 
+result on **The Old One**: 
 - without modification : time to insert 100.000 points took: 0.204881 sec (avg)
 - without OPENMP       : time to insert 100.000 points took: 0.112934 sec (avg)
 - with optimisation    : time to insert 100.000 points took: 0.0584745 sec (avg)
