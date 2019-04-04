@@ -36,7 +36,9 @@ result on **The Old One**:
 |  geb079_max50m.graph <br> Data points in graph: 5903426 | time to insert scans:<br> 12.095 sec<br> time to insert 100.000 points took:<br> 0.204881 sec (avg) |time to insert scans:<br> 6.667 sec<br>time to insert 100.000 points took:<br> 0.112934 sec (avg) | time to insert scans:<br> 3.452 sec <br>time to insert 100.000 points took:<br> 0.0584745 sec (avg) |
 | new_college_dataset.graph <br> Data points in graph: 14468149| time to insert scans:<br> 184.516 sec<br>time to insert 100.000 points took:<br> 1.27533 sec (avg) | time to insert scans:<br> 84.289 sec<br>time to insert 100.000 points took:<br> 0.582583 sec (avg) |time to insert scans:<br> 139.228 sec<br>time to insert 100.000 points took:<br> 0.962307 sec (avg)|
 
-*Results are unconclusive, have to test on other datasets/ computer...*
+removing critical section is a good thing BUT: using lots of threads to computeUpdate seems to be a bad choice when frames contain a few rays (new_college_dataset : ~= 200ptS per scans VS geb079_max50m ~= 90000pts per scan): time is spent in *SwitchToThread*
+
+*Results are unconclusive for now, have to test on other datasets/ computer...*
 
 FIXME later: 
 When resolution is high (-res 0.01) the bottleneck change: octomap::OccupancyOcTreeBase<octomap::OcTreeNode>::updateNode
