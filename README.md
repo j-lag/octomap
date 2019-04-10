@@ -12,10 +12,13 @@ Test are done on:
   * Number of cores		4 (max 4)
   * Number of threads	8 (max 8)
   
-**The New One**
-  * TODO
-
-
+**The Young One**
+  * Name			Intel Core i9 7900X
+	 * Codename		Skylake-X
+	 * Specification		Intel(R) Core(TM) i9-7900X CPU @ 3.30GHz
+  * Number of cores		10 (max 10)
+	 * Number of threads	20 (max 20)
+	
 Day 1:
 --------
 OccupancyOcTreeBase<NODE>::computeUpdate is multithreaded with openMP. This is good BUT
@@ -35,6 +38,18 @@ result on **The Old One**:
 | ------------- | ------------- | ------------- | ------------- |
 |  geb079_max50m.graph <br> Data points in graph: 5903426 | time to insert scans:<br> 12.095 sec<br> time to insert 100.000 points took:<br> 0.204881 sec (avg) |time to insert scans:<br> 6.667 sec<br>time to insert 100.000 points took:<br> 0.112934 sec (avg) | time to insert scans:<br> 3.452 sec <br>time to insert 100.000 points took:<br> 0.0584745 sec (avg) |
 | new_college_dataset.graph <br> Data points in graph: 14468149| time to insert scans:<br> 184.516 sec<br>time to insert 100.000 points took:<br> 1.27533 sec (avg) | time to insert scans:<br> 84.289 sec<br>time to insert 100.000 points took:<br> 0.582583 sec (avg) |time to insert scans:<br> 139.228 sec<br>time to insert 100.000 points took:<br> 0.962307 sec (avg)|
+
+result on **The Young One**: 
+
+| *TEST_FILE*         | Original OpenMp |without OpenMP | OpenMP with optimisation |
+| ------------- | ------------- | ------------- | ------------- |
+|  geb079_max50m.graph <br> Data points in graph: 5903426 | time to insert scans:<br> 8.415 sec<br> time to insert 100.000 points took:<br> 0.142544 sec (avg) |time to insert scans:<br> 3.784 sec<br>time to insert 100.000 points took:<br> 0.0640984 sec (avg) | time to insert scans:<br> 1.334 sec <br>time to insert 100.000 points took:<br> 0.022597 sec (avg) |
+| new_college_dataset.graph <br> Data points in graph: 14468149| time to insert scans:<br> 81.485 sec<br>time to insert 100.000 points took:<br> 0.563203 sec (avg) | time to insert scans:<br> 50.958 sec<br>time to insert 100.000 points took:<br> 0.352208 sec (avg) |time to insert scans:<br> 148.523 sec<br>time to insert 100.000 points took:<br> 1.02655 sec (avg)|
+| fr_campus <br> Data points in graph: | time to insert scans:<br> 67.045 sec<br>time to insert 100.000 points took:<br> 0.334003 sec (avg)| time to insert scans:<br> 40.81 sec<br>time to insert 100.000 points took:<br> 0.203306 sec (avg)|time to insert scans:<br> 17.408 sec<br>time to insert 100.000 points took:<br> 0.0867227 sec (avg)|
+
+
+
+
 
 removing critical section is a good thing BUT: using lots of threads to computeUpdate seems to be a bad choice when frames contain a few rays (new_college_dataset : ~= 200ptS per scans VS geb079_max50m ~= 90000pts per scan): time is spent in *SwitchToThread*
 
