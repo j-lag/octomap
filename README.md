@@ -14,10 +14,10 @@ Test are done on:
   
 **The Young One**
   * Name			Intel Core i9 7900X
-	 * Codename		Skylake-X
-	 * Specification		Intel(R) Core(TM) i9-7900X CPU @ 3.30GHz
+  * Codename		Skylake-X
+  * Specification		Intel(R) Core(TM) i9-7900X CPU @ 3.30GHz
   * Number of cores		10 (max 10)
-	 * Number of threads	20 (max 20)
+  * Number of threads	20 (max 20)
 	
 Day 1:
 --------
